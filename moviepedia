@@ -1,0 +1,9 @@
+#! /usr/bin/php 
+
+<?php
+
+require 'vendor/autoload.php';
+
+$app = new Application("moviepedia","1.0");
+
+$app->run();
