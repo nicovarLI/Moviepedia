@@ -1,9 +1,14 @@
-#! /usr/bin/php 
+#! /usr/bin/env php
 
 <?php
+
+use Acme\GetMovieInfoCommand;
+use Symfony\Component\Console\Application;
+
 
 require 'vendor/autoload.php';
 
 $app = new Application("moviepedia","1.0");
 
+$app->Add(new GetMovieInfoCommand);
 $app->run();
