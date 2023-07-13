@@ -31,17 +31,22 @@ class GetMovieInfoCommand extends Command{
     private function render(OutputInterface $output,$request){
         $response = json_decode($request->getBody(),true);
         $aux = array();
-        foreach ($response as $row){
+        $tableTitle = $response['Title'].' - '.$response['Year'];
+        foreach ($response as $key => $row){
             if(is_array($row)){
-               $str = implode(",",$row);
-               array_push($aux,$str);
+                $rating ='';
+                foreach($row as $arr){
+                    $rating = $rating.$arr['Source'].': '.$arr['Value'].' || ';
+                }
+               array_push($aux,$rating);
             }else{
-            array_push($aux,$row);
+                array_push($aux,$row);
             }
         }
         $titles = array_keys($response);
         $table = new Table($output);
         $table->setHeaders($titles)
+              ->setHeaderTitle($tableTitle)
               ->setHorizontal()
               ->addRow($aux);
               $table->render();
