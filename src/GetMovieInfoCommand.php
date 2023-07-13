@@ -3,6 +3,7 @@
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use GuzzleHttp\Client;
@@ -15,6 +16,7 @@ class GetMovieInfoCommand extends Command{
         $this->setName('show')
              ->setDescription('Get information of a specified movie')
              ->addArgument('title',InputArgument::REQUIRED,'Title of the movie to search')
+             ->addOption('fullPlot',null,InputOption::VALUE_NONE,'Displays the full plot of the movie')
              ->client = new Client([
                  'base_uri' => 'http://www.omdbapi.com/',
                  'timeout'  => 10.0,
@@ -22,8 +24,10 @@ class GetMovieInfoCommand extends Command{
     }
     function execute(InputInterface $input, OutputInterface $output){
         $title = $input->getArgument('title');
-        $request = $this->client->request('GET','/?t='.$title.'&apikey=473bcac3');
-        
+        if($input->getOption('fullPlot')){
+            $plot = '&plot=full';
+        }
+        $request = $this->client->request('GET','/?t='.$title.$plot.'&apikey=473bcac3');
         $this->render($output, $request);
         return command::SUCCESS;
     }
@@ -34,9 +38,9 @@ class GetMovieInfoCommand extends Command{
         $tableTitle = $response['Title'].' - '.$response['Year'];
         foreach ($response as $key => $row){
             if(is_array($row)){
-                $rating ='';
-                foreach($row as $arr){
-                    $rating = $rating.$arr['Source'].': '.$arr['Value'].' || ';
+                $rating ="\n";
+                foreach($row as $rowData){
+                    $rating .="{$rowData['Source']}: {$rowData['Value']}\n";
                 }
                array_push($aux,$rating);
             }else{
@@ -48,6 +52,7 @@ class GetMovieInfoCommand extends Command{
         $table->setHeaders($titles)
               ->setHeaderTitle($tableTitle)
               ->setHorizontal()
+              ->setColumnMaxWidth(1, 120)
               ->addRow($aux);
               $table->render();
         
